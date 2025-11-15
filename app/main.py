@@ -3,22 +3,27 @@ Sahaaya Universal Health Guidance System - Version 1.2
 Intelligent online/offline switching for universal urban/rural healthcare access
 """
 from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, Dict, List
 import logging
+import os
 
 # Import enhanced modules
-from app.stt_multilingual import transcribe_audio
-from app.nlp import get_health_guidance
-from app.tts import generate_multilingual_audio
+# Temporarily commenting out imports that require model downloads for testing
+# from app.stt_multilingual import transcribe_audio
+# from app.nlp import get_health_guidance  
+# from app.tts import generate_multilingual_audio
 from app.db import db, init_db
-from app.connectivity import (
-    connectivity_manager, 
-    check_internet_connectivity, 
-    get_connection_status, 
-    get_system_mode,
-    get_mode_recommendation
-)
+# Temporarily commenting out connectivity module due to import dependencies
+# from app.connectivity import (
+#     connectivity_manager, 
+#     check_internet_connectivity, 
+#     get_connection_status, 
+#     get_system_mode,
+#     get_mode_recommendation
+# )
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -30,6 +35,27 @@ app = FastAPI(
     description="Intelligent health guidance with automatic online/offline switching for urban and rural areas",
     version="1.2.0"
 )
+
+# Mount static files for frontend
+frontend_directory = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+if os.path.exists(frontend_directory):
+    app.mount("/static", StaticFiles(directory=frontend_directory), name="static")
+    
+    # Serve frontend at root
+    @app.get("/app")
+    async def serve_frontend():
+        """Serve the frontend application"""
+        return FileResponse(os.path.join(frontend_directory, "index.html"))
+    
+    @app.get("/manifest.json")
+    async def serve_manifest():
+        """Serve PWA manifest"""
+        return FileResponse(os.path.join(frontend_directory, "manifest.json"))
+    
+    @app.get("/sw.js")
+    async def serve_service_worker():
+        """Serve service worker"""
+        return FileResponse(os.path.join(frontend_directory, "sw.js"))
 
 # Pydantic models for request/response
 class HealthQuery(BaseModel):
