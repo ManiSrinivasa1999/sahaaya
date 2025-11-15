@@ -1,0 +1,34 @@
+# Core framework
+fastapi==0.104.1
+uvicorn==0.24.0
+
+# AI and ML libraries
+transformers==4.35.2
+torch==2.1.1
+openai-whisper==20231117
+
+# Medical AI models (optional - install if needed)
+# medicalai==1.2.3
+# biobert-pytorch==1.0.1
+
+# Data processing
+numpy==1.24.3
+pandas==1.5.3
+scikit-learn==1.3.0
+
+# Text processing
+nltk==3.8.1
+spacy==3.7.2
+regex==2023.10.3
+
+# Audio processing
+soundfile==0.12.1
+librosa==0.10.1
+
+# API and web
+requests==2.31.0
+aiohttp==3.9.1
+
+# Utilities
+python-dotenv==1.0.0
+pydantic==2.5.0
