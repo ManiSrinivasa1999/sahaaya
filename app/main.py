@@ -228,3 +228,7 @@ def process_offline_mode(query: HealthQuery) -> Dict:
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "version": "1.2.0"}
+
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(rest_of_path: str):
+    return {}
