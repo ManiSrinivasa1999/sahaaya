@@ -4,7 +4,7 @@ uvicorn==0.24.0
 
 # AI and ML libraries
 transformers==4.35.2
-torch==2.1.1
+torch==2.5.1
 openai-whisper==20231117
 
 # Medical AI models (optional - install if needed)
