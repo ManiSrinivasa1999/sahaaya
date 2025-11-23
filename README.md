@@ -1,5 +1,13 @@
 # Sahaaya Universal Health Guidance System
 
+## Live Deployment
+
+Frontend (Live App):  
+https://manisrinivasa1999.github.io/sahaaya/frontend
+
+Backend (FastAPI API):  
+https://sahaaya-rvuy.onrender.com
+
 ## Installation & Setup
 
 ### 1. Clone the Repository
@@ -30,10 +38,3 @@ http://localhost:8000/app
 - Offline/Online/Hybrid Modes
 - Emergency Protocols
 - PWA (installable, offline-capable)
-
-## Troubleshooting
-- If you see `ModuleNotFoundError`, ensure all dependencies are installed.
-- For Anaconda users, prefer `conda install` for core packages if pip fails.
-
----
-For more details, see `FRONTEND_README.md` and `TTS_Enhancement_Guide.md`.
