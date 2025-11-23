@@ -235,7 +235,7 @@ class SahaayaApp {
     }
     
     async sendHealthQuery(text) {
-        const endpoint = 'https://sahaaya-ruvy.onrender.com/smart-process';
+        const endpoint = 'https://sahaaya-rvuy.onrender.com/smart-process';
         
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -420,7 +420,7 @@ class SahaayaApp {
         try {
             this.showLoading();
             
-            const response = await fetch('https://sahaaya-ruvy.onrender.com/emergency-protocol', {
+            const response = await fetch('https://sahaaya-rvuy.onrender.com/emergency-protocol', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

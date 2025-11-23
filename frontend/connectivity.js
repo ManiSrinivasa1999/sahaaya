@@ -111,7 +111,7 @@ class ConnectivityManager {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
             
-            const response = await fetch(`https://sahaaya-ruvy.onrender.com/connectivity-status`, {
+            const response = await fetch(`https://sahaaya-rvuy.onrender.com/connectivity-status`, {
                 method: 'GET',
                 signal: controller.signal,
                 cache: 'no-cache',
