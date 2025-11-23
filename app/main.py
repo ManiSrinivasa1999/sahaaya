@@ -24,10 +24,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 origins = [
     "https://manisrinivasa1999.github.io",
+    "https://manisrinivasa1999.github.io/*",
     "http://localhost",
-    "http://localhost:3000",
-    "*",  # optional while testing
+    "http://localhost:3000"
 ]
+
 
 app.add_middleware(
     CORSMiddleware,
