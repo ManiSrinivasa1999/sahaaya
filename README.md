@@ -1,5 +1,13 @@
 # Sahaaya Universal Health Guidance System
 
+## Live Deployment
+
+Frontend (Live App):  
+https://manisrinivasa1999.github.io/sahaaya/frontend
+
+Backend (FastAPI API):  
+https://sahaaya-rvuy.onrender.com
+
 ## Installation & Setup
 
 ### 1. Clone the Repository
