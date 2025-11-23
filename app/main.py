@@ -20,6 +20,23 @@ from app.connectivity import (
     get_mode_recommendation
 )
 
+from fastapi.middleware.cors import CORSMiddleware
+
+origins = [
+    "https://manisrinivasa1999.github.io",
+    "http://localhost",
+    "http://localhost:3000",
+    "*",  # optional while testing
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,          # OR ["*"] while testing
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Initialize connectivity manager
 connectivity_manager = ConnectivityManager()
 
