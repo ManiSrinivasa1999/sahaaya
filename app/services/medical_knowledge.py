@@ -1,7 +1,8 @@
-from transformers import pipeline
-import re
+"""
+Medical Knowledge Base Service
+Provides health guidance using rule-based medical knowledge
+"""
 from typing import Dict, List, Tuple
-import json
 
 # Enhanced Medical symptom patterns with multilingual support
 MEDICAL_KNOWLEDGE_BASE = {
@@ -70,7 +71,7 @@ MEDICAL_KNOWLEDGE_BASE = {
             # Hindi
             "पेट", "पेट में दर्द", "उल्टी", "दस्त", "पेट की समस्या", "गैस", "एसिडिटी",
             # Telugu
-            "కడుపు", "కడుపు నొప్पి", "వాంతులు", "విరేచనలు", "జీర్ణకోశం",
+            "కడుపు", "కడుపు నొప్పి", "వాంతులు", "విరేచనలు", "జీర్ణకోశం",
             # Tamil
             "வயிறு", "வயிற்று வலி", "வாந்தி", "வயிற்றுப்போக்கு",
             # Bengali
@@ -110,7 +111,7 @@ MEDICAL_KNOWLEDGE_BASE = {
             # Telugu
             "అలసట", "బలహీనత", "నిద్రలేమి", "ఒత్తిడి", "అలిసిపోవు",
             # Tamil
-            "களைப்பு", "பலவীனம்", "தூக்கமின்மை", "மன அழுத்தம்",
+            "களைப்பு", "பலவீனம்", "தூக்கமின்மை", "மன அழுத்தம்",
             # Bengali
             "ক্লান্তি", "দুর্বলতা", "ঘুমের সমস্যা", "চাপ", "অবসাদ"
         ],
@@ -155,6 +156,234 @@ MEDICAL_KNOWLEDGE_BASE = {
         "advice": "Keep the area clean and dry, avoid scratching, use mild soap. Apply cold compress for itching. See a doctor if symptoms worsen or persist.",
         "severity": "low",
         "urgency": "routine"
+    },
+    
+    # COVID-19 symptoms
+    "covid": {
+        "keywords": [
+            # English
+            "covid", "covid-19", "coronavirus", "covid19", "corona", "covid infection", "covid positive", "tested positive", "covid symptoms",
+            # Hindi
+            "कोविड", "कोविड-19", "कोरोनावायरस", "कोरोना", "कोविड संक्रमण", "कोविड सकारात्मक",
+            # Telugu
+            "కోవిడ్", "కోవిడ్-19", "కరోనావైరస్", "కరోనా", "కోవిడ్ సంక్రమణ",
+            # Tamil
+            "கோவிட்", "கோவிட்-19", "கொரோனா", "கொரோனா வைரஸ்", "கோவிட் தொற்று",
+            # Bengali
+            "কোভিড", "কোভিড-১৯", "করোনাভাইরাস", "করোনা", "কোভিড সংক্রমণ"
+        ],
+        "advice": "COVID-19 Guidance: Self-isolate for at least 5-7 days from symptom onset. Take paracetamol or ibuprofen for fever/pain. Stay hydrated, rest well. Monitor oxygen levels if available. Get tested to confirm. See a doctor if you develop shortness of breath, persistent chest pain, or severe symptoms. High-risk individuals should seek medical care early.",
+        "severity": "medium",
+        "urgency": "monitor"
+    },
+    
+    # Chickenpox
+    "chickenpox": {
+        "keywords": [
+            # English
+            "chickenpox", "chicken pox", "varicella", "chicken-pox", "pox", "blisters", "rash blisters", "fluid filled blisters",
+            # Hindi
+            "चेचक", "छोटी माता", "चिकन पॉक्स", "फुंसिया", "तरल भरे फुंसिये",
+            # Telugu
+            "గుండెలు", "చిక్కన్ పాక్స్", "నీటి భరితమైన ఫుంసులు",
+            # Tamil
+            "கோழி குத்தல்", "கோழி குத்து", "அம்மை", "திரவ நிரம்பிய புடைப்புகள்",
+            # Bengali
+            "বসন্ত", "চিকেন পক্স", "জলবসন্ত", "তরল পূর্ণ ফোসকা"
+        ],
+        "advice": "Chickenpox Guidance: This is a contagious viral infection. Isolate from others for 5-7 days after rash appears. Use calamine lotion for itching, avoid scratching to prevent scars. Take paracetamol for fever. Keep nails trimmed. Drink fluids and get adequate rest. See a doctor if you develop high fever, difficulty breathing, or signs of secondary infection. Vaccination is available for prevention.",
+        "severity": "medium",
+        "urgency": "monitor"
+    },
+    
+    # Measles
+    "measles": {
+        "keywords": [
+            # English
+            "measles", "german measles", "rubeola", "rubella", "rash with fever", "red rash",
+            # Hindi
+            "खसरा", "लाल दाग", "ज्वर के साथ रैश", "खसरा वायरस",
+            # Telugu
+            "గlonddon్ను", "లాల రసా", "జ్వరం సహ రసా",
+            # Tamil
+            "தட்டம்பučka", "தட்டம்பைக் காய்ச்சல்", "சிவப்பு அரிப்பு",
+            # Bengali
+            "হাম", "লাল দাগ", "জ্বর সহ রাশ", "হাম ভাইরাস"
+        ],
+        "advice": "Measles Guidance: This is a highly contagious viral disease. Isolate from others. Rest in a dark room, stay hydrated, take paracetamol for fever. Vitamin A supplementation is recommended. See a doctor immediately if you develop high fever (>104°F), difficulty breathing, confusion, or severe rash. Vaccination (MMR) is the best prevention.",
+        "severity": "medium",
+        "urgency": "monitor"
+    },
+    
+    # Dengue
+    "dengue": {
+        "keywords": [
+            # English
+            "dengue", "dengue fever", "dengue virus", "breakbone fever", "sudden fever", "muscle pain with fever",
+            # Hindi
+            "डेंगू", "डेंगू बुखार", "डेंगू वायरस", "हड्डी तोड़ने वाला बुखार",
+            # Telugu
+            "డెంగ్యూ", "డెంగ్యూ జ్వరం", "ఎముక విరామ జ్వరం",
+            # Tamil
+            "டெங்கு", "டெங்கு காய்ச்சல்", "எலும்பு முறிக்கும் காய்ச்சல்",
+            # Bengali
+            "ডেঙ্গু", "ডেঙ্গু জ্বর", "ডেঙ্গু ভাইরাস", "হাড় ভাঙা জ্বর"
+        ],
+        "advice": "Dengue Guidance: Rest completely, stay hydrated, take paracetamol (NOT aspirin). Monitor platelet count. Watch for warning signs: vomiting, abdominal pain, lethargy, rapid breathing. See a doctor immediately if you have signs of dengue hemorrhagic fever. Use mosquito nets and avoid mosquito bites during recovery. No specific treatment; supportive care is essential.",
+        "severity": "high",
+        "urgency": "monitor"
+    },
+    
+    # Malaria
+    "malaria": {
+        "keywords": [
+            # English
+            "malaria", "malaria infection", "malaria fever", "plasmodium", "intermittent fever", "chills and fever together",
+            # Hindi
+            "मलेरिया", "मलेरिया संक्रमण", "मलेरिया बुखार", "प्लाज्मोडियम",
+            # Telugu
+            "మలేరియా", "మలేరియా సంక్రమణ", "మలేరియా జ్వరం",
+            # Tamil
+            "மலேரியா", "மலேரியா காய்ச்சல்", "மலேரியா தொற்று",
+            # Bengali
+            "ম্যালেরিয়া", "ম্যালেরিয়া সংক্রমণ", "ম্যালেরিয়া জ্বর"
+        ],
+        "advice": "Malaria Guidance: Get tested immediately with a blood test. Treatment with antimalarial drugs is essential - consult a doctor urgently. Rest, stay hydrated, take paracetamol for fever. Avoid dehydration and monitor for severe symptoms. Prevention: Use mosquito nets, insect repellent, and take prophylaxis if traveling to malaria zones.",
+        "severity": "high",
+        "urgency": "monitor"
+    },
+    
+    # Typhoid
+    "typhoid": {
+        "keywords": [
+            # English
+            "typhoid", "typhoid fever", "enteric fever", "salmonella", "sustained high fever", "rose spots",
+            # Hindi
+            "टाइफाइड", "टाइफाइड बुखार", "आंत्रिक बुखार", "साल्मोनेला",
+            # Telugu
+            "టైఫాయిడ్", "టైఫాయిడ్ జ్వరం", "సాల్మోనెల్లా",
+            # Tamil
+            "டைஃபாய்டு", "டைஃபாய்டு காய்ச்சல்", "குடல் காய்ச்சல்",
+            # Bengali
+            "টাইফয়েড", "টাইফয়েড জ্বর", "সালমোনেলা"
+        ],
+        "advice": "Typhoid Guidance: See a doctor immediately for blood testing and confirmation. Antibiotic treatment is essential. Rest, stay hydrated, eat soft foods. Avoid anti-diarrheal medications. Monitor temperature closely. Prevention: Get vaccinated, use clean water, practice food hygiene.",
+        "severity": "high",
+        "urgency": "monitor"
+    },
+    
+    # Common Cold
+    "cold": {
+        "keywords": [
+            # English
+            "cold", "common cold", "runny nose", "nasal congestion", "sneezing", "rhinovirus", "stuffy nose",
+            # Hindi
+            "सर्दी", "आम सर्दी", "नाक बहना", "नाक की भीड़", "छींक", "नाक में रुकावट",
+            # Telugu
+            "జలుబా", "సర్దీ", "ముక్కు నిష్కాసనం", "చీArchive్ (* వెనుక సవరణ)",
+            # Tamil
+            "சளி", "பொதுவான சளி", "மூக்கு ஒழுகுதல்", "மூக்கு அடைப்பு",
+            # Bengali
+            "সর্দি", "সাধারণ সর্দি", "নাক দিয়ে পানি পড়া", "নাকের আবেগ"
+        ],
+        "advice": "Common Cold Guidance: This is a mild viral infection. Rest, stay hydrated, gargle with salt water. Use saline nasal drops, drink warm fluids. Vitamin C may help. Avoid smoking and secondhand smoke. Most colds resolve in 7-10 days. See a doctor if symptoms worsen or last beyond 2 weeks.",
+        "severity": "low",
+        "urgency": "routine"
+    },
+    
+    # Influenza (Flu)
+    "influenza": {
+        "keywords": [
+            # English
+            "flu", "influenza", "influenza virus", "viral infection", "muscle aches with fever", "sudden onset fever",
+            # Hindi
+            "फ्लू", "इन्फ्लूएंजा", "इन्फ्लूएंजा वायरस", "अचानक बुखार",
+            # Telugu
+            "ఫ్లూ", "ఇన్ఫ్లూయెంజా", "ఇన్ఫ్లూయెంజా వైరస్",
+            # Tamil
+            "காய்ச்சல்", "ஃபிளூ", "ஃபிளூ வைரஸ்", "திடீர் காய்ச்சல்",
+            # Bengali
+            "ফ্লু", "ইনফ্লুয়েঞ্জা", "ইনফ্লুয়েঞ্জা ভাইরাস", "আকস্মিক জ্বর"
+        ],
+        "advice": "Influenza Guidance: Rest, stay hydrated, take paracetamol or ibuprofen for fever. Antiviral medications (oseltamivir) work best if started within 48 hours. Avoid others to prevent spread. Gargle with salt water for sore throat. See a doctor if you have severe symptoms, difficulty breathing, or high-risk conditions. Annual vaccination is recommended.",
+        "severity": "medium",
+        "urgency": "monitor"
+    },
+    
+    # Jaundice
+    "jaundice": {
+        "keywords": [
+            # English
+            "jaundice", "yellow skin", "yellowish eyes", "liver infection", "hepatitis", "bilirubin", "pale stool", "dark urine",
+            # Hindi
+            "पीलिया", "पीली त्वचा", "पीली आंखें", "यकृत संक्रमण", "हेपेटाइटिस", "पीला मल",
+            # Telugu
+            "కన్నపిచ్చ", "పసుపు చర్మం", "కాలు సంక్రమణ", "హెపటైటిస్",
+            # Tamil
+            "மஞ்சள் காமாலை", "மஞ்சள் தோல்", "மஞ்சள் கண்கள்", "கல்லீரல் தொற்று",
+            # Bengali
+            "জন্ডিস", "হলুদ ত্বক", "হলুদ চোখ", "লিভার সংক্রমণ", "হেপাটাইটিস"
+        ],
+        "advice": "Jaundice Guidance: See a doctor urgently for liver function tests. Rest completely, avoid alcohol and fatty foods. Eat light, nutritious foods. Stay hydrated. Treatment depends on cause (viral hepatitis, gallstones, etc.). Monitor bilirubin levels. Prevent hepatitis A through vaccination and hygiene. Hepatitis B and C need specific medical treatment.",
+        "severity": "high",
+        "urgency": "monitor"
+    },
+    
+    # Diarrhea with complications
+    "diarrhea": {
+        "keywords": [
+            # English
+            "diarrhea", "severe diarrhea", "bloody stool", "dysentery", "loose motion", "watery stool", "frequent bowel movement",
+            # Hindi
+            "दस्त", "गंभीर दस्त", "खूनी मल", "पेचिश", "दर्द के साथ दस्त",
+            # Telugu
+            "విరేచనలు", "గంభీర విరేచనలు", "రక్త కలిగిన మల", "పేచిష్", "నిరంతర మల శుభ్రతలు",
+            # Tamil
+            "வயிற்றுப்போக்கு", "கடுமையான வயிற்றுப்போக்கு", "இரத்த மலம்", "மிகுந்த வயிற்றுப்போக்கு",
+            # Bengali
+            "ডায়রিয়া", "গুরুতর ডায়রিয়া", "রক্তের মল", "গুরুতর মলত্যাগ"
+        ],
+        "advice": "Diarrhea Guidance: Stay hydrated with ORS solution. Avoid dairy, spicy, and fatty foods. Eat bland foods like rice, bread, bananas. Wash hands frequently. See a doctor if you have bloody stools, severe dehydration, fever >102°F, or symptoms lasting >3 days. Infectious cases need isolation and medical evaluation.",
+        "severity": "medium",
+        "urgency": "monitor"
+    },
+    
+    # Asthma/Respiratory issues
+    "asthma": {
+        "keywords": [
+            # English
+            "asthma", "asthmatic", "shortness of breath", "wheezing", "difficulty breathing", "chronic cough", "asthma attack",
+            # Hindi
+            "अस्थमा", "दमा", "सांस की तकलीफ", "घरघराहट", "क्रॉनिक खांसी",
+            # Telugu
+            "ఆస్థమా", "శ్వాస ఆడక", "చిసలు", "దీర్ఘకాలిక దగ్గు",
+            # Tamil
+            "ஆஸ்துமா", "இருமல் সাথে", "மூச்சு திணறல்", "தோடெனత்வு",
+            # Bengali
+            "হাঁপানি", "শ্বাসকষ্ট", "হাঁপানির আক্রমণ", "দীর্ঘস্থায়ী কাশি"
+        ],
+        "advice": "Asthma Guidance: Use your inhaler immediately during an attack. Sit upright, breathe slowly. Avoid triggers (allergens, pollution, cold air). Take controller medications regularly as prescribed. See a doctor if attacks become frequent. Emergency: Go to hospital if wheezing doesn't improve or you have severe difficulty breathing.",
+        "severity": "medium",
+        "urgency": "monitor"
+    },
+    
+    # Diabetes symptoms
+    "diabetes": {
+        "keywords": [
+            # English
+            "diabetes", "diabetic", "high blood sugar", "high glucose", "thirsty", "frequent urination", "polydipsia",
+            # Hindi
+            "मधुमेह", "डायबिटीज", "उच्च रक्त शर्करा", "अधिक प्यास", "बार-बार पेशाब",
+            # Telugu
+            "మధుమేహం", "డయాబెటిస్", "ఎక్కువ రక్త చక్కెర", "ఎక్కువ దాహం",
+            # Tamil
+            "சர்க்கரை நோய்", "சர்க்கரை", "உயர் இரத்த சர்க்கரை", "அதிக தாகம்",
+            # Bengali
+            "ডায়াবেটিস", "মধুমেহ", "উচ্চ রক্ত শর্করা", "অত্যধিক তৃষ্ণা"
+        ],
+        "advice": "Diabetes Guidance: Monitor blood sugar levels regularly. Follow prescribed diet with reduced sugars. Exercise regularly. Take medications as directed. Check feet daily for sores. See your doctor regularly for HbA1c testing. Maintain healthy weight. In case of very high/low blood sugar symptoms, seek immediate medical help.",
+        "severity": "medium",
+        "urgency": "routine"
     }
 }
 
@@ -162,15 +391,13 @@ MEDICAL_KNOWLEDGE_BASE = {
 LANGUAGE_RESPONSES = {
     "te": {  # Telugu
         "emergency": "⚠️ అత్యవసరం: వెంటనే వైద్య సహాయం పొందండి. 108 కు కాల్ చేయండి లేదా సమీపంలోని ఆసుపత్రికి వెళ్లండి.",
-        "fever": "మీ ఉష్ణోగ్రతను పర్యవేక్షించండి. విశ్రాంతి తీసుకోండి, ద్రవాలు తాగండి, అవసరమైతే పారాసిటమాల్ తీసుకోండి. జ్వరం 102°F (39°C) మించినా లేదా 3 రోజులకు మించి ఉంటే వైద్యుడిని చూడండి.",
+        "fever": "మీ ఉష్ణోగ్రతను పర్యవేక్షించండి. విశ్రాంతి తీసుకోండి, ద్రవాలు తాగండి, అవసరమైతే పారాసిటామాల్ తీసుకోండి. జ్వరం 102°F (39°C) మించినా లేదా 3 రోజులకు మించి ఉంటే వైద్యుడిని చూడండి.",
         "headache": "చీకటి గదిలో విశ్రాంతి తీసుకోండి, నీరు తాగండి, బిగ్గరగా శబ్దాలను నివారించండి. అవసరమైతే తేలికపాటి నొప్పి మందులు తీసుకోండి. అకస్మాత్తుగా తీవ్రమైన తలనొప్పికి వెంటనే సహాయం పొందండి.",
         "cough": "హైడ్రేట్ అయి ఉండండి, గొంతు మృదువుగా ఉండేందుకు తేనె వాడండి, చల్లని పానీయాలను నివారించండి. దగ్గు 2 వారాలకు మించి కొనసాగితే లేదా రక్తం వస్తుంటే వైద్యుడిని చూడండి.",
         "stomach": "తేలికపాటి ఆహారం తీసుకోండి, ORS తో హైడ్రేట్ అయి ఉండండి. పాల ఉత్పాదాలు మరియు మసాలా ఆహారాన్ని నివారించండి. లక్షణాలు 48 గంటలకు మించి ఉంటే వైద్యుడిని చూడండి.",
         "body_pain": "వెచ్చని కంప్రెస్ వేయండి, మెల్లిగా స్ట్రెచ్ చేయండి, ప్రభావిత ప్రాంతానికి విశ్రాంతి ఇవ్వండి. అవసరమైతే తేలికపాటి నొప్పి మందులు తీసుకోండి.",
         "skin": "ప్రాంతాన్ని శుభ్రంగా మరియు పొడిగా ఉంచండి, గోక్కోవడం నివారించండి, తేలికపాటి సబ్బును వాడండి. దురదకు చల్లని కంప్రెస్ వేయండి.",
         "wellness": "తగినంత నిద్ర తీసుకోండి (7-8 గంటలు), క్రమ వ్యాయామం చేయండి, సమతుల్య ఆహారం తీసుకోండి. ఒత్తిడి నిర్వహణ పద్ధతులను పరిగణించండి.",
-        "see_doctor": "వైద్యుడిని సంప్రదించండి।",
-        "rest_advice": "విశ్రాంతి తీసుకోండి మరియు నీరు తాగండి।",
         "disclaimer": "💡 ఇది సాధారణ మార్గదర్శకత్వం మాత్రమే. సరైన నిర్ధారణ మరియు చికిత్స కోసం ఎల్లప్పుడూ ఆరోగ్య నిపుణులను సంప్రదించండి।"
     },
     "hi": {  # Hindi
@@ -182,8 +409,6 @@ LANGUAGE_RESPONSES = {
         "body_pain": "गर्म सिकाई करें, धीरे से स्ट्रेचिंग करें, प्रभावित क्षेत्र को आराम दें। जरूरत पड़ने पर हल्की दर्द निवारक दवा लें।",
         "skin": "क्षेत्र को साफ और सूखा रखें, खुजली न करें, हल्का साबुन उपयोग करें। खुजली के लिए ठंडी सिकाई करें।",
         "wellness": "पर्याप्त नींद लें (7-8 घंटे), नियमित व्यायाम करें, संतुलित आहार लें। तनाव प्रबंधन तकनीकों पर विचार करें।",
-        "see_doctor": "डॉक्टर से सलाह लें।",
-        "rest_advice": "आराम करें और पानी पिएं।",
         "disclaimer": "💡 यह केवल सामान्य मार्गदर्शन है। उचित निदान और उपचार के लिए हमेशा स्वास्थ्य पेशेवरों से सलाह लें।"
     },
     "ta": {  # Tamil
@@ -192,10 +417,10 @@ LANGUAGE_RESPONSES = {
         "headache": "இருண்ட அறையில் ஓய்வு எடுங்கள், தண்ணீர் அருந்துங்கள், சத்தம் தவிர்க்கவும்।",
         "cough": "நீரேற்றமாக இருங்கள், தொண்டைக்கு தேன் பயன்படுத்துங்கள், குளிர் பானங்களை தவிர்க்கவும்।",
         "stomach": "இலகுவான உணவு சாப்பிடுங்கள், ORS உடன் நீரேற்றமாக இருங்கள்।",
-        "body_pain": "சூடான ஒத்தடம் கொடுங்கள், மெதுவாக நீட்டுங்கள், பாதிக்கப்பட்ட பகுதிக்கு ஓய்வு கொடுங்கள்।",
-        "skin": "பகுதியை சுத்தமாகவும் உலர்ந்ததாகவும் வைத்துக் கொள்ளுங்கள், அரிப்பை தவிர்க்கவும்।",
-        "wellness": "போதுமான தூக்கம் எடுங்கள் (7-8 மணி நேரம்), வழக்கமான உடற்பயிற்சி செய்யுங்கள்।",
-        "disclaimer": "💡 இது பொதுவான வழிகாட்டுதல் மட்டுமே। சரியான நோய் கண்டறிதல் மற்றும் சிகிச்சைக்கு எப்போதும் சுகாதார நிபுணர்களை அணுகவும்।"
+        "body_pain": "சூடான ஒத்தடம் கொடுங்கள், மெதுவாக நீட்டுங்கள், பாதிக்கப்பட்ட பகுதிக்கு ஓய்வு கொடுங்கள்.",
+        "skin": "பகுதியை சுத்தமாகவும் உலர்ந்ததாகவும் வைத்துக் கொள்ளுங்கள், அரிப்பை தவிர்க்கவும்.",
+        "wellness": "போதுமான தூக்கம் எடுங்கள் (7-8 மணி நேரம்), வழக்கமான உடற்பயிற்சி செய்யுங்கள்.",
+        "disclaimer": "💡 இது பொதுவான வழிகாட்டுதல் மட்டுமே. சரியான நோய் கண்டறிதல் மற்றும் சிகிச்சைக்கு எப்போதும் சுகாதார நிபுணர்களை அணுகவும்।"
     },
     "bn": {  # Bengali
         "emergency": "⚠️ জরুরি: অবিলম্বে চিকিৎসা সহায়তা নিন। ১০৮ এ কল করুন বা নিকটস্থ হাসপাতালে যান।",
@@ -241,18 +466,6 @@ def detect_language(text: str) -> str:
     
     # Default to English
     return "en"
-
-# Initialize better medical AI model (if available)
-try:
-    # Try to use a medical-specific model or better general model
-    # nlp = pipeline("text2text-generation", model="google/flan-t5-base")
-    # Disable AI model for testing - use rule-based system only
-    nlp = None
-    use_advanced_ai = False
-except Exception:
-    # Fallback to rule-based system only
-    nlp = None
-    use_advanced_ai = False
 
 def extract_symptoms(text: str) -> List[str]:
     """Extract medical symptoms from user text using pattern matching"""
@@ -350,23 +563,6 @@ def generate_personalized_advice(symptoms: List[str], severity: str, urgency: st
     
     return " ".join(advice_parts)
 
-def get_ai_enhanced_response(user_text: str, detected_symptoms: List[str]) -> str:
-    """Use AI to enhance the response with more natural language"""
-    if not use_advanced_ai:
-        return ""
-    
-    try:
-        # Create a medical-focused prompt
-        prompt = f"As a helpful health assistant, provide safe medical advice for someone with these symptoms: {', '.join(detected_symptoms)}. User said: '{user_text}'. Give brief, safe advice and recommend seeing a doctor when appropriate."
-        
-        response = nlp(prompt, max_length=150, min_length=50, do_sample=True, temperature=0.7)
-        if isinstance(response, list) and len(response) > 0:
-            return response[0].get('generated_text', '').replace(prompt, '').strip()
-    except Exception:
-        pass
-    
-    return ""
-
 def get_health_guidance(user_text: str, language: str = "en") -> Dict:
     """
     Enhanced health guidance with medical accuracy
@@ -393,17 +589,9 @@ def get_health_guidance(user_text: str, language: str = "en") -> Dict:
     # Generate rule-based advice
     rule_based_advice = generate_personalized_advice(detected_symptoms, severity, urgency, language)
     
-    # Try to enhance with AI if available
-    ai_advice = get_ai_enhanced_response(user_text, detected_symptoms)
-    
-    # Combine responses intelligently
-    if ai_advice and len(ai_advice.strip()) > 20:  # Use AI if it generated substantial response
-        final_advice = ai_advice + "\n\n" + "💡 Always consult healthcare professionals for proper diagnosis."
-    else:
-        final_advice = rule_based_advice
-    
     return {
-        "guidance": final_advice,
+        "response": rule_based_advice,
+        "guidance": rule_based_advice,
         "detected_symptoms": detected_symptoms,
         "severity": severity,
         "urgency": urgency,

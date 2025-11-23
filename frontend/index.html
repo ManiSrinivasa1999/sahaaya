@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Sahaaya - Universal Health Guidance System supporting urban and rural areas"
+    />
+    <title>Sahaaya - Universal Health Guidance</title>
+
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#2563eb" />
+
+    <!-- Fonts and Icons -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Header with Status Indicators -->
+      <header class="header">
+        <h1><i class="fas fa-heartbeat"></i> Sahaaya</h1>
+      </header>
+
+      <!-- Main Application Container -->
+      <main class="main-container">
+        <!-- Language Selection -->
+        <div class="language-selection">
+          <label for="language-select">🌍 Select Language / भाषा चुनें</label>
+          <select id="language-select" class="language-dropdown">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+            <option value="bn">বাংলা (Bengali)</option>
+          </select>
+        </div>
+
+        <!-- Emergency Button (Always Visible) -->
+        <div class="emergency-section">
+          <button id="emergency-btn" class="emergency-button">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span data-translate="emergency">🚨 EMERGENCY</span>
+          </button>
+        </div>
+
+        <!-- Input Methods Selection -->
+        <div class="input-methods">
+          <div class="method-buttons">
+            <button id="voice-input-btn" class="method-btn active">
+              <i class="fas fa-microphone"></i>
+              <span data-translate="voice-input">Voice Input</span>
+            </button>
+            <button id="text-input-btn" class="method-btn">
+              <i class="fas fa-keyboard"></i>
+              <span data-translate="text-input">Text Input</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Voice Input Section -->
+        <div id="voice-section" class="input-section active">
+          <div class="voice-container">
+            <div class="microphone-area">
+              <button id="record-btn" class="record-button">
+                <i class="fas fa-microphone"></i>
+              </button>
+              <div class="recording-status">
+                <span id="recording-text" data-translate="tap-to-speak"
+                  >Tap to speak in your language</span
+                >
+              </div>
+            </div>
+
+            <div id="voice-feedback" class="voice-feedback hidden">
+              <div class="transcription">
+                <h4 data-translate="you-said">You said:</h4>
+                <p id="transcription-text"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Text Input Section -->
+        <div id="text-section" class="input-section">
+          <div class="text-container">
+            <div class="text-input-area">
+              <textarea
+                id="health-query"
+                placeholder="Describe your health concern in your language..."
+                data-translate-placeholder="describe-concern"
+                rows="4"
+              ></textarea>
+              <button id="submit-text-btn" class="submit-button">
+                <i class="fas fa-paper-plane"></i>
+                <span data-translate="get-guidance">Get Health Guidance</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading hidden">
+          <div class="spinner"></div>
+          <p data-translate="processing">Processing your health query...</p>
+        </div>
+
+        <!-- Response Section -->
+        <div id="response-section" class="response-section hidden">
+          <div class="response-header">
+            <h3 data-translate="health-guidance">Health Guidance</h3>
+            <div class="response-controls">
+              <button
+                id="speak-response-btn"
+                class="control-btn"
+                title="Listen to response"
+              >
+                <i class="fas fa-volume-up"></i>
+              </button>
+              <button
+                id="save-response-btn"
+                class="control-btn"
+                title="Save response"
+              >
+                <i class="fas fa-bookmark"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="response-content" class="response-content">
+            <!-- Dynamic response content will be inserted here -->
+          </div>
+
+          <!-- Emergency Actions (if emergency detected) -->
+          <div id="emergency-actions" class="emergency-actions hidden">
+            <div class="emergency-header">
+              <i class="fas fa-exclamation-triangle"></i>
+              <h4 data-translate="emergency-detected">Emergency Detected!</h4>
+            </div>
+            <div class="emergency-buttons">
+              <button id="call-108-btn" class="emergency-action-btn">
+                <i class="fas fa-phone"></i>
+                <span>Call 108</span>
+              </button>
+              <button id="call-police-btn" class="emergency-action-btn">
+                <i class="fas fa-shield-alt"></i>
+                <span>Call 100</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Saved Responses -->
+        <div class="saved-responses">
+          <button id="show-history-btn" class="history-btn">
+            <i class="fas fa-history"></i>
+            <span data-translate="consultation-history"
+              >Consultation History</span
+            >
+          </button>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <div class="footer-content">
+          <p data-translate="universal-access">
+            🌍 Universal Access: Urban & Rural Healthcare
+          </p>
+          <div class="mode-info">
+            <span id="footer-mode-info"
+              >Offline Mode: Works without internet</span
+            >
+          </div>
+        </div>
+      </footer>
+
+      <!-- Emergency Modal -->
+      <div id="emergency-modal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>
+              <i class="fas fa-exclamation-triangle"></i> Emergency Assistance
+            </h2>
+            <button id="close-emergency-modal" class="close-btn">
+              &times;
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="emergency-options">
+              <button class="emergency-type-btn" data-emergency="cardiac">
+                <i class="fas fa-heart"></i>
+                <span>Heart/Chest Pain</span>
+              </button>
+              <button class="emergency-type-btn" data-emergency="respiratory">
+                <i class="fas fa-lungs"></i>
+                <span>Breathing Problem</span>
+              </button>
+              <button class="emergency-type-btn" data-emergency="trauma">
+                <i class="fas fa-user-injured"></i>
+                <span>Accident/Injury</span>
+              </button>
+              <button class="emergency-type-btn" data-emergency="unconscious">
+                <i class="fas fa-bed"></i>
+                <span>Unconscious</span>
+              </button>
+              <button class="emergency-type-btn" data-emergency="general">
+                <i class="fas fa-exclamation"></i>
+                <span>Other Emergency</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Modal -->
+      <div id="history-modal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2><i class="fas fa-history"></i> Consultation History</h2>
+            <button id="close-history-modal" class="close-btn">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div id="history-content">
+              <!-- Dynamic history content -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="translations.js"></script>
+    <script src="connectivity.js"></script>
+    <script src="voice-handler.js"></script>
+    <script src="app.js"></script>
+
+    <!-- PWA Service Worker -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("sw.js")
+          .then((registration) => console.log("SW registered"))
+          .catch((error) => console.log("SW registration failed"));
+      }
+    </script>
+  </body>
+</html>

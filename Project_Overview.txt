@@ -1,0 +1,133 @@
+Sahaaya Universal Health Guidance System
+========================================
+
+## Project Overview
+Sahaaya is a comprehensive healthcare guidance system for both urban and rural environments. It helps users get health advice in their own language, using either voice or text, and works even without internet. Sahaaya can guide users in emergencies, and is installable as a mobile app (PWA). The system is privacy-first: no personal data is stored on the server.
+
+---
+
+## How Sahaaya Works (Step-by-Step)
+1. **User opens the app** (web or mobile) and selects their language.
+2. **User describes their health concern** using voice or text.
+3. **The backend processes the query:**
+  - If online, it uses AI/NLP for advanced guidance.
+  - If offline, it uses a local database and rules.
+  - If it's an emergency, it triggers protocols immediately.
+4. **The system responds** in the user's language, with advice, severity, and audio playback.
+5. **All features adapt** to connectivity and device.
+
+---
+
+## What Each Code File Does
+
+### Backend (Python, FastAPI)
+- `app/main.py`: Main backend server. Handles API requests, serves the frontend, manages online/offline modes, and emergency protocols.
+- `app/db.py`: Manages the offline health database (CSV/JSON). Used for quick, local health advice.
+- `app/connectivity.py`: Detects internet status and recommends the best mode (online, offline, hybrid).
+- `app/services/medical_knowledge.py`: Contains the logic for extracting symptoms, determining severity, and generating advice using NLP and rules.
+- `app/stt.py`, `app/tts.py`: Speech-to-text and text-to-speech modules for voice input/output.
+- `app/emergency.py`: Handles emergency health protocols.
+- `test_main.py`, `test_v12_modules.py`, `demo_sahaaya.py`: Scripts for testing the backend, database, and API endpoints.
+
+### Frontend (HTML, JS, CSS)
+- `frontend/index.html`: Main user interface.
+- `frontend/app.js`: Handles all user interactions, API calls, and response display.
+- `frontend/voice-handler.js`: Manages voice input and output.
+- `frontend/connectivity.js`: Monitors internet status and updates the UI.
+- `frontend/translations.js`: Manages language switching and translations.
+- `frontend/manifest.json`, `frontend/sw.js`: Enable PWA features (installable, offline support).
+- `frontend/styles.css`: Responsive design for all devices.
+
+### Documentation
+- `README.md`: Setup and run instructions.
+- `FRONTEND_README.md`: Frontend details and user flow.
+- `TTS_Enhancement_Guide.md`: Details on the text-to-speech system.
+
+---
+
+## 1. Technology Stack
+Sahaaya uses modern, open-source technologies for both frontend and backend:
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript, Web APIs (Speech Recognition, Service Worker)
+- **Backend:** Python 3, FastAPI, Uvicorn
+- **AI/ML:** Transformers, Torch, spaCy, NLTK, scikit-learn, OpenAI Whisper
+- **Database:** Local file-based (offline), Pandas for data handling
+- **Other:** PWA (manifest, service worker), CORS, REST APIs
+
+---
+
+## 2. System Architecture
+Sahaaya is split into two main parts:
+- **Frontend:** Runs in the browser or as a mobile app (PWA). Handles user input, language, and displays results.
+- **Backend:** Runs on a server (or locally). Handles all health logic, AI, and database queries. Adapts to internet status.
+  - Responsive web app (PWA), supports voice/text input, multilingual UI
+  - Communicates with backend via REST APIs
+  - Offline support via service worker and manifest
+  - FastAPI server with endpoints for health queries, emergency protocols, audio processing, and connectivity
+  - Automatic online/offline/hybrid mode switching
+  - Serves static frontend files and PWA assets
+  - Frontend served at `/app`, API at `/`
+  - Connectivity manager adapts features based on internet status
+
+---
+
+## 3. Data Model & Storage
+All user queries are structured using Pydantic models for validation. No personal data is stored on the server. Offline data is managed using Pandas and local files.
+- **Health Queries:**
+  - Pydantic models: `HealthQuery`, `AudioQuery`, `EmergencyQuery`
+  - Fields: text/audio, language, location, user_id, emergency_type
+- **Storage:**
+  - Offline: Local database (CSV/JSON), managed via Pandas
+  - Online: No persistent user data stored (privacy-first)
+  - Audio: Temporary files, auto-cleaned
+
+---
+
+## 4. AI / ML / Automation Components
+Sahaaya uses a mix of rule-based and AI/ML models for health guidance, language detection, and voice features. It can work fully offline using rules and a local database, or use advanced AI when online.
+- **NLP:**
+  - spaCy, NLTK for symptom extraction, language detection
+  - Transformers for advanced health guidance (when online)
+- **Speech:**
+  - OpenAI Whisper for STT (Speech-to-Text)
+  - Custom TTS (Text-to-Speech) with multilingual support
+- **Automation:**
+  - Emergency protocol triggers
+  - Connectivity-aware mode switching
+
+---
+
+## 5. Security & Compliance
+Sahaaya is designed for privacy and security. All sensitive data stays on the user's device. The backend validates all inputs and uses secure communication.
+- **Data Privacy:**
+  - No personal data stored on server
+  - Consultation history stored locally in browser
+- **Security:**
+  - HTTPS ready
+  - Input validation and sanitization
+  - Service worker for secure offline caching
+- **Compliance:**
+  - Designed for privacy-first, minimal data retention
+
+---
+
+## 6. Scalability & Performance
+Sahaaya is lightweight and modular. The backend can scale horizontally, and the frontend is optimized for fast load and offline use.
+- **Backend:**
+  - FastAPI + Uvicorn: Async, scalable, lightweight
+  - Modular design for easy extension
+- **Frontend:**
+  - PWA: Fast load, offline-first, mobile-optimized
+  - Service worker caching, lazy loading
+- **Performance Targets:**
+  - <2s first load, <1s voice recognition, <0.5s offline query
+
+---
+
+## 7. Repository & Demo Links
+- **GitHub Repository:** [https://github.com/ManiSrinivasa1999/sahaaya](https://github.com/ManiSrinivasa1999/sahaaya)
+- **Demo Video:** [https://youtu.be/your-demo-video-link](https://youtu.be/your-demo-video-link)
+
+---
+
+## Contact
+For more details, see the repository or contact the project maintainer.
