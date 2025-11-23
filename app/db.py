@@ -166,6 +166,44 @@ class OfflineHealthDatabase:
                 })
             },
             {
+                'name': 'Fever',
+                'symptoms': json.dumps(['fever', 'high temperature', 'chills', 'sweating']),
+                'severity': 'medium',
+                'category': 'general',
+                'description': 'Body temperature elevated above normal',
+                'home_treatment': 'Rest, drink fluids, take paracetamol or ibuprofen, cool compress',
+                'when_to_see_doctor': 'If fever exceeds 103°F or lasts more than 3 days',
+                'emergency_signs': json.dumps(['fever above 104°F', 'severe headache', 'confusion']),
+                'prevention': 'Vaccination, hygiene, avoid infected people',
+                'common_age_groups': json.dumps(['children', 'adults', 'elderly']),
+                'languages': json.dumps({
+                    'en': 'Fever',
+                    'hi': 'बुखार',
+                    'te': 'జ్వరం',
+                    'ta': 'காய்ச்சல்',
+                    'bn': 'জ্বর'
+                })
+            },
+            {
+                'name': 'Headache',
+                'symptoms': json.dumps(['headache', 'head pain', 'throbbing']),
+                'severity': 'low',
+                'category': 'neurological',
+                'description': 'Pain in the head or neck region',
+                'home_treatment': 'Rest in dark room, stay hydrated, apply cold compress, take painkillers',
+                'when_to_see_doctor': 'If sudden severe or with fever/neck stiffness',
+                'emergency_signs': json.dumps(['sudden severe headache', 'with high fever', 'confusion']),
+                'prevention': 'Manage stress, stay hydrated, regular exercise',
+                'common_age_groups': json.dumps(['all ages']),
+                'languages': json.dumps({
+                    'en': 'Headache',
+                    'hi': 'सिरदर्द',
+                    'te': 'తలనొప్పి',
+                    'ta': 'தலைவலி',
+                    'bn': 'মাথাব্যথা'
+                })
+            },
+            {
                 'name': 'Asthma Attack',
                 'symptoms': json.dumps(['wheezing', 'shortness of breath', 'chest tightness', 'coughing']),
                 'severity': 'high',
@@ -226,25 +264,23 @@ class OfflineHealthDatabase:
                     'bn': 'খাদ্য বিষক্রিয়া'
                 })
             },
-            
-            # Neurological Conditions  
             {
-                'name': 'Migraine Headache',
-                'symptoms': json.dumps(['severe headache', 'nausea', 'light sensitivity', 'sound sensitivity']),
-                'severity': 'medium',
-                'category': 'neurological',
-                'description': 'Intense headache often with sensory disturbances',
-                'home_treatment': 'Dark room, rest, cold compress, hydration',
-                'when_to_see_doctor': 'If sudden severe headache or pattern changes',
-                'emergency_signs': json.dumps(['sudden severe headache', 'fever with headache', 'vision loss']),
-                'prevention': 'Identify triggers, stress management, regular sleep',
-                'common_age_groups': json.dumps(['adults 20-50', 'more common in women']),
+                'name': 'Chest Pain',
+                'symptoms': json.dumps(['chest pain', 'chest tightness']),
+                'severity': 'high',
+                'category': 'cardiac',
+                'description': 'Pain or discomfort in the chest area',
+                'home_treatment': 'Sit down, rest, try to relax. Seek immediate medical help.',
+                'when_to_see_doctor': 'IMMEDIATELY - Seek emergency care',
+                'emergency_signs': json.dumps(['severe chest pain', 'shortness of breath', 'dizziness']),
+                'prevention': 'Heart healthy lifestyle, regular checkups',
+                'common_age_groups': json.dumps(['adults']),
                 'languages': json.dumps({
-                    'en': 'Migraine Headache',
-                    'hi': 'माइग्रेन सिरदर्द',
-                    'te': 'మైగ్రేన్ తలనొప్పి',
-                    'ta': 'ஒற்றைத் தலைவலி',
-                    'bn': 'মাইগ্রেন মাথাব্যথা'
+                    'en': 'Chest Pain',
+                    'hi': 'सीने में दर्द',
+                    'te': 'ఛాతీ నొప్పి',
+                    'ta': 'மார்பு வலி',
+                    'bn': 'বুকে ব্যথা'
                 })
             }
         ]
@@ -261,6 +297,33 @@ class OfflineHealthDatabase:
                 condition['when_to_see_doctor'], condition['emergency_signs'], 
                 condition['prevention'], condition['common_age_groups'], condition['languages']
             ))
+        
+        # Populate symptoms table
+        symptoms_data = [
+            ('fever', 'general', 'high', json.dumps(['Fever', 'Common Cold']), json.dumps(['high fever above 104F', 'with severe headache'])),
+            ('headache', 'neurological', 'medium', json.dumps(['Headache', 'Migraine']), json.dumps(['sudden severe', 'with fever'])),
+            ('cough', 'respiratory', 'low', json.dumps(['Common Cold', 'Asthma']), json.dumps(['severe cough', 'blood in phlegm'])),
+            ('chest pain', 'cardiac', 'high', json.dumps(['Heart Attack', 'Chest Pain']), json.dumps(['severe pain', 'shortness of breath'])),
+            ('nausea', 'digestive', 'medium', json.dumps(['Food Poisoning']), json.dumps(['severe vomiting', 'blood in vomit'])),
+            ('vomiting', 'digestive', 'medium', json.dumps(['Food Poisoning']), json.dumps(['blood in vomit', 'severe dehydration'])),
+            ('diarrhea', 'digestive', 'medium', json.dumps(['Food Poisoning']), json.dumps(['severe dehydration', 'bloody stool'])),
+            ('shortness of breath', 'respiratory', 'high', json.dumps(['Asthma Attack', 'Heart Attack']), json.dumps(['inability to speak', 'blue lips'])),
+            ('wheezing', 'respiratory', 'medium', json.dumps(['Asthma Attack']), json.dumps(['severe wheezing', 'no improvement'])),
+            ('sore throat', 'respiratory', 'low', json.dumps(['Common Cold']), json.dumps(['severe pain', 'with fever'])),
+        ]
+        
+        for symptom, category, severity, conditions, red_flags in symptoms_data:
+            cursor.execute("""
+                INSERT OR IGNORE INTO symptoms 
+                (symptom, category, severity_indicator, associated_conditions, red_flags, languages)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (symptom, category, severity, conditions, red_flags, json.dumps({
+                'en': symptom,
+                'hi': symptom,  # Would need translation
+                'te': symptom,
+                'ta': symptom,
+                'bn': symptom
+            })))
         
         # Sample Emergency Protocols
         emergency_protocols = [

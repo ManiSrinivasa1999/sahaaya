@@ -13,8 +13,9 @@ import threading
 import os
 
 # Change to the correct directory
-os.chdir('/Users/mabhila9/sahaaya_env/sahaaya-backend')
-sys.path.insert(0, '/Users/mabhila9/sahaaya_env/sahaaya-backend')
+current_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(current_dir)
+sys.path.insert(0, current_dir)
 
 def test_offline_database():
     """Test the offline database directly"""
@@ -54,30 +55,28 @@ def start_server():
     """Start the testing server"""
     print("🚀 Starting Sahaaya Testing Server...")
     try:
-        # Use subprocess to start server
+        import sys
+        python_exe = sys.executable
+        
         cmd = [
-            '/Users/mabhila9/sahaaya_env/bin/python', 
+            python_exe,
             '-m', 'uvicorn', 
-            'test_main:app', 
-            '--host', '0.0.0.0', 
-            '--port', '8002'
+            'app.main:app', 
+            '--host', '127.0.0.1', 
+            '--port', '8000'
         ]
         
-        env = os.environ.copy()
-        env['PYTHONPATH'] = '/Users/mabhila9/sahaaya_env/sahaaya-backend'
+        current_dir = os.path.dirname(os.path.abspath(__file__))
         
         process = subprocess.Popen(
             cmd, 
-            cwd='/Users/mabhila9/sahaaya_env/sahaaya-backend',
-            env=env,
+            cwd=current_dir,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True
         )
         
-        # Wait for server to start
         time.sleep(3)
-        
         return process
         
     except Exception as e:
@@ -88,7 +87,7 @@ def test_api_endpoints():
     """Test the API endpoints"""
     print("🌐 Testing API Endpoints...")
     
-    base_url = "http://localhost:8002"
+    base_url = "http://localhost:8000"
     
     try:
         # Test 1: Root endpoint
@@ -158,8 +157,8 @@ def test_api_endpoints():
 def show_frontend_info():
     """Show information about the frontend"""
     print("🎨 Frontend Application Info...")
-    print("   📱 URL: http://localhost:8002/app")
-    print("   📚 API Docs: http://localhost:8002/docs")
+    print("   📱 URL: http://localhost:8000/app")
+    print("   📚 API Docs: http://localhost:8000/docs")
     print("   🔧 Testing Mode: Offline database only")
     print("")
     print("🌟 Frontend Features Available:")
@@ -214,8 +213,8 @@ def main():
             print("✅ Frontend: Available")
             
             print(f"\n🌐 Access your application at:")
-            print(f"   Frontend: http://localhost:8002/app")
-            print(f"   API Docs: http://localhost:8002/docs")
+            print(f"   Frontend: http://localhost:8000/app")
+            print(f"   API Docs: http://localhost:8000/docs")
             
             print(f"\n⏸️  Press Ctrl+C to stop the server...")
             

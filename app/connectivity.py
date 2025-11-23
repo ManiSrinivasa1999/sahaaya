@@ -39,8 +39,8 @@ class ConnectivityManager:
         """
         current_time = time.time()
         
-        # Use cached result if recent
-        if (current_time - self.last_check_time) < self.cache_duration:
+        # Use cached result if recent (cache for 60 seconds)
+        if (current_time - self.last_check_time) < 60:
             return {
                 'internet_available': self.last_status,
                 'cached_result': True,
@@ -48,25 +48,18 @@ class ConnectivityManager:
                 'recommendation': self._get_mode_recommendation(self.last_status)
             }
         
-        # Perform fresh connectivity tests
-        test_results = []
-        
-        # Test DNS servers (faster, more reliable)
-        for server in self.test_servers[:2]:  # DNS servers
-            result = self._test_dns_connection(server)
-            test_results.append(result)
-        
-        # Test HTTP endpoints (more comprehensive)
-        for server in self.test_servers[2:]:  # HTTP servers
-            result = self._test_http_connection(server)
-            test_results.append(result)
-        
-        # Analyze results
-        successful_tests = sum(1 for result in test_results if result['success'])
-        total_tests = len(test_results)
-        
-        # Consider connected if at least 50% of tests succeed
-        is_connected = successful_tests >= (total_tests // 2)
+        # For offline environments, assume not connected to save time
+        # Only test DNS quickly
+        is_connected = False
+        try:
+            # Quick DNS test only (much faster)
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(2)
+            result = sock.connect_ex(('8.8.8.8', 53))
+            sock.close()
+            is_connected = (result == 0)
+        except Exception:
+            is_connected = False
         
         # Update cache
         self.last_check_time = current_time
@@ -74,14 +67,9 @@ class ConnectivityManager:
         
         return {
             'internet_available': is_connected,
-            'confidence': successful_tests / total_tests,
-            'successful_tests': successful_tests,
-            'total_tests': total_tests,
-            'test_details': test_results,
             'cached_result': False,
             'last_check': current_time,
-            'recommendation': self._get_mode_recommendation(is_connected),
-            'connection_quality': self._assess_connection_quality(test_results)
+            'recommendation': self._get_mode_recommendation(is_connected)
         }
     
     def _test_dns_connection(self, server: Dict) -> Dict:

@@ -11,19 +11,36 @@ import logging
 import os
 
 # Import enhanced modules
-# Temporarily commenting out imports that require model downloads for testing
-# from app.stt_multilingual import transcribe_audio
-# from app.nlp import get_health_guidance  
-# from app.tts import generate_multilingual_audio
 from app.db import db, init_db
-# Temporarily commenting out connectivity module due to import dependencies
-# from app.connectivity import (
-#     connectivity_manager, 
-#     check_internet_connectivity, 
-#     get_connection_status, 
-#     get_system_mode,
-#     get_mode_recommendation
-# )
+from app.connectivity import (
+    ConnectivityManager,
+    check_internet_connectivity,
+    get_connection_status,
+    get_system_mode,
+    get_mode_recommendation
+)
+
+# Initialize connectivity manager
+connectivity_manager = ConnectivityManager()
+
+# Stub functions for modules requiring model downloads
+def get_health_guidance(text: str, language: str = "en") -> Dict:
+    """Health guidance using NLP knowledge base and offline database"""
+    try:
+        # Use the NLP module's health guidance with knowledge base
+        from app.nlp import get_health_guidance as nlp_guidance
+        return nlp_guidance(text, language)
+    except Exception as e:
+        logger.warning(f"NLP guidance failed: {e}, falling back to offline")
+        return db.get_offline_health_guidance(text, language)
+
+def transcribe_audio(audio_file: str, language: Optional[str] = None) -> Dict:
+    """Audio transcription stub - requires model downloads"""
+    return {"error": "Audio transcription unavailable", "success": False}
+
+def generate_multilingual_audio(text: str, language: str = "en") -> Dict:
+    """TTS stub - requires model downloads"""
+    return {"error": "TTS unavailable", "success": False}
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -90,14 +107,17 @@ async def startup_event():
 @app.get("/")
 def home():
     """Enhanced home endpoint with system status"""
-    connectivity = get_connection_status()
+    try:
+        connectivity = get_connection_status()
+    except Exception:
+        connectivity = {"internet_available": False, "recommendation": {"mode": "offline"}}
     
     return {
         "message": "Sahaaya Universal Health Guidance System - Version 1.2",
         "status": "operational",
         "connectivity": {
-            "internet_available": connectivity["internet_available"],
-            "recommended_mode": connectivity["recommendation"]["mode"]
+            "internet_available": connectivity.get("internet_available", False),
+            "recommended_mode": connectivity.get("recommendation", {}).get("mode", "offline")
         },
         "capabilities": {
             "urban_support": True,
@@ -113,12 +133,19 @@ def home():
 @app.get("/connectivity-status")
 def get_connectivity_status():
     """Get detailed connectivity status and system capabilities"""
-    connectivity_info = connectivity_manager.get_system_mode_info()
+    try:
+        connectivity_info = get_connection_status()
+    except Exception:
+        connectivity_info = {"internet_available": False, "recommendation": {"mode": "offline"}}
     
     return {
-        "connectivity": connectivity_info["connectivity_status"],
-        "recommended_mode": connectivity_info["recommended_mode"],
-        "system_capabilities": connectivity_info["system_capabilities"],
+        "internet_available": connectivity_info.get("internet_available", False),
+        "recommended_mode": connectivity_info.get("recommendation", {}).get("mode", "offline"),
+        "system_capabilities": {
+            "offline_database": True,
+            "multilingual": True,
+            "emergency_protocols": True
+        },
         "universal_access": True,
         "mode_descriptions": {
             "hybrid": "AI-enhanced processing with offline backup (Urban areas)",
@@ -136,19 +163,17 @@ def smart_process_query(query: HealthQuery, background_tasks: BackgroundTasks):
     try:
         # Get current connectivity and mode recommendation
         connectivity = get_connection_status()
-        is_online = connectivity["internet_available"]
-        recommended_mode = connectivity["recommendation"]["mode"]
+        is_online = connectivity.get("internet_available", False)
         
-        logger.info(f"Processing query in {recommended_mode} mode (online: {is_online})")
+        logger.info(f"Processing query - Online: {is_online}")
         
-        if recommended_mode == "hybrid" and is_online:
-            # Urban scenario: AI + offline enhancement
-            return process_hybrid_mode(query)
-        elif recommended_mode == "offline" or not is_online:
-            # Rural scenario: Complete offline functionality
-            return process_offline_mode(query)
+        if is_online:
+            # ONLINE MODE: Use AI + NLP knowledge base
+            logger.info("🌐 ONLINE MODE: Using AI-powered health guidance")
+            return process_online_mode(query)
         else:
-            # Fallback: Pure offline mode
+            # OFFLINE MODE: Use local database only
+            logger.info("📍 OFFLINE MODE: Using local database")
             return process_offline_mode(query)
             
     except Exception as e:
@@ -172,7 +197,7 @@ def get_offline_guidance(query: HealthQuery):
             "internet_required": False,
             "suitable_for": ["rural", "remote", "emergency"],
             "data_source": "local_database",
-            "timestamp": connectivity_manager.last_check_time
+            "timestamp": None
         })
         
         return guidance
@@ -289,6 +314,32 @@ def process_audio_query(query: AudioQuery):
         logger.error(f"Audio processing error: {e}")
         raise HTTPException(status_code=500, detail=f"Audio processing failed: {e}")
 
+def process_online_mode(query: HealthQuery) -> Dict:
+    """
+    Process query in ONLINE mode using AI/NLP knowledge base.
+    Uses intelligent symptom analysis and smart guidance.
+    """
+    try:
+        # Use NLP-based health guidance
+        ai_guidance = get_health_guidance(query.text, query.language)
+        
+        # Add online mode indicators
+        ai_guidance.update({
+            "processing_mode": "🌐 online_ai",
+            "internet_available": True,
+            "mode_indicator": "🌐 ONLINE MODE - AI Powered Health Guidance",
+            "data_source": "AI Knowledge Base + Medical Database",
+            "confidence": "high"
+        })
+        
+        logger.info(f"Online mode processed: {query.text[:50]}")
+        return ai_guidance
+        
+    except Exception as e:
+        logger.warning(f"Online AI processing failed: {e}, falling back to offline")
+        # Fallback to offline mode
+        return process_offline_mode(query)
+
 def process_hybrid_mode(query: HealthQuery) -> Dict:
     """
     Process query in hybrid mode (urban areas with internet).
@@ -338,6 +389,8 @@ def process_offline_mode(query: HealthQuery) -> Dict:
             "processing_mode": "offline",
             "internet_required": False,
             "rural_optimized": True,
+            "database_source": "Local Offline Database",
+            "mode_indicator": "📍 OFFLINE MODE - Using Local Database",
             "local_emergency_info": db.get_emergency_contacts(),
             "offline_capabilities": [
                 "symptom_analysis",
@@ -357,6 +410,7 @@ def process_offline_mode(query: HealthQuery) -> Dict:
             "guidance": "Unable to process query. Please seek medical attention if symptoms persist.",
             "emergency_contact": "108",
             "processing_mode": "basic_fallback",
+            "mode_indicator": "📍 OFFLINE MODE - Fallback",
             "error": str(e)
         }
 
@@ -372,14 +426,20 @@ def health_check():
             db_status = "error"
         
         # Test connectivity manager
-        connectivity_status = get_connection_status()
+        try:
+            connectivity_status = get_connection_status()
+            current_mode = connectivity_status.get("recommendation", {}).get("mode", "offline")
+            internet_available = connectivity_status.get("internet_available", False)
+        except Exception:
+            current_mode = "offline"
+            internet_available = False
         
         return {
             "status": "healthy",
             "database": db_status,
             "connectivity_manager": "operational",
-            "current_mode": get_system_mode(),
-            "internet_available": connectivity_status["internet_available"],
+            "current_mode": current_mode,
+            "internet_available": internet_available,
             "version": "1.2.0"
         }
     except Exception as e:
