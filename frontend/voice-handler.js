@@ -207,7 +207,7 @@ class VoiceHandler {
       window.app.showLoading();
 
       // Send to backend
-      const response = await fetch("/smart-process", {
+      const response = await fetch("https://sahaaya-ruvy.onrender.com/smart-process", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
